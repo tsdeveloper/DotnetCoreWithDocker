@@ -1,0 +1,34 @@
+version: "3.4"
+
+networks:
+  backend:
+
+services:
+  ecommercedb:
+    container_name: ecommerce_db
+    restart: always
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=password@12345#
+    networks:
+      - backend
+    ports:
+      - 8001:1433
+  ecommerceapi:
+    container_name: ecommerce_api
+    image: ${DOCKER_REGISTRY-}ecommerceapi
+    build:
+      context: .
+      dockerfile: Dockerfile
+    networks:
+      - backend
+    ports:
+      - 5008:80
+    environment:
+      - DB_HOST=ecommercedb
+      - DB_HOST_PORT=8001
+      - DB_NAME=EcommerceDb
+      - DB_SA_PASSWORD=password@12345#
+    depends_on:
+      - ecommercedb
